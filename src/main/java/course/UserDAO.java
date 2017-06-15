@@ -102,7 +102,7 @@ public class UserDAO {
         return user;
     }
 
-
+    // test comment
     private String makePasswordHash(String password, String salt) {
         try {
             String saltedAndHashed = password + "," + salt;
