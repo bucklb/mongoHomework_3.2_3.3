@@ -66,6 +66,33 @@ public class BlogPostDAO {
         return posts;
     }
 
+    // Return a list of posts in descending order. Limit determines
+    // how many posts are returned.
+    public List<Document> findByAuthor(String userName, int limit) {
+
+        // XXX HW 3.2,  Work Here
+        // Return a list of DBObjects, each one a post from the posts collection
+
+        // Want to get ALL the documents, so don't really need a filter.  Add a sort to get the posts in order
+        List<Document> posts = new LinkedList<Document>();;
+        Document theSort=new Document("date",-1);
+        Document theFltr=new Document("author",userName);
+
+        // Empty filter and sort to get the first relevant post (and we can then step through the list using iterator)
+        MongoCursor<Document> cursor=postsCollection.find(theFltr).sort(theSort).limit(limit).iterator();
+
+        // Step through and to our list (makes little odds if it's array or linked list)
+        while(cursor.hasNext()) {
+            posts.add(cursor.next());
+        }
+
+        // pass list back
+        return posts;
+    }
+
+
+
+
 
     public String addPost(String title, String body, List tags, String username) {
 

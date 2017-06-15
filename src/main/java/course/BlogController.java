@@ -126,6 +126,24 @@ public class BlogController {
             }
         });
 
+        // Look at locating author's posts
+        get(new FreemarkerBasedRoute("/mine", "blog_template.ftl") {
+            @Override
+            public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
+                String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
+
+                List<Document> posts = blogPostDAO.findByAuthor(username,20);
+                SimpleHash root = new SimpleHash();
+
+                root.put("myposts", posts);
+                if (username != null) {
+                    root.put("username", username);
+                }
+
+                template.process(root, writer);
+            }
+        });
+
         // used to display actual blog post detail page
         get(new FreemarkerBasedRoute("/post/:permalink", "entry_template.ftl") {
             @Override
