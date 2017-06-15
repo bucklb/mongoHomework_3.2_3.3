@@ -14,6 +14,12 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+// Possible exercises to play with:
+//  find post by author
+//  find comments by name
+//  find post by tag
+
+
 public class BlogPostDAO {
     MongoCollection<Document> postsCollection;
 
@@ -43,74 +49,21 @@ public class BlogPostDAO {
         // XXX HW 3.2,  Work Here
         // Return a list of DBObjects, each one a post from the posts collection
 
-        List<Document> posts = null;
+        // Want to get ALL the documents, so don't really need a filter.  Add a sort to get the posts in order
+        List<Document> posts = new LinkedList<Document>();;
+        Document theSort=new Document("date",-1);
+//        Document theFltr=new Document("author","bob");
 
-        /*
-        List<Document> posts = new ArrayList<Document>();
+        // Empty filter and sort to get the first relevant post (and we can then step through the list using iterator)
+        MongoCursor<Document> cursor=postsCollection.find().sort(theSort).limit(limit).iterator();
 
-        MongoCursor<Document> cursor=postsCollection.find().iterator();
-        try{
-
-            // Step through the collection and add it to posts collection
-            while (cursor.hasNext()) {
-
-                System.out.println("looking for next in cursor ...");
-                posts.add(cursor.next());
-            }
-
-            System.out.println(posts.size());
-            System.out.println(posts);
-
-        }finally{
-            // let it go, let it go ...
-            cursor.close();
-        }
-        return posts;
-*/
-
-
-/*
-        posts = new ArrayList<Document>();
-
-        List<Document> list = postsCollection.find().sort(new Document().append("date", -1)).limit(limit).into(new ArrayList<Document>());
-
-        for (Document document : list) {
-            posts.add(document);
-        }
-*/
-
-
-
-
-        MongoCursor<Document> cursor=postsCollection.find().sort(new BasicDBObject().append("date", -1)).limit(limit).iterator();
-//        MongoCursor<Document> cursor=postsCollection.find().iterator();
-        posts = new ArrayList<Document>();
-
+        // Step through and to our list (makes little odds if it's array or linked list)
         while(cursor.hasNext()) {
-            //System.out.println(cursor.next());
-            Document d = cursor.next();
-            System.out.println(d);
-            posts.add(d);
+            posts.add(cursor.next());
         }
 
-        System.out.println(posts);
-
-
-/*
-        MongoCursor<DBObject> cursor=postsCollection.find().iterator();
-        posts = new LinkedList<DBObject>();
-        for (DBObject value : cursor) {
-            posts.add(value);
-        }
-        System.out.println("Value from the DB" + posts);
-*/
-
-
-
-
+        // pass list back
         return posts;
-
-
     }
 
 
@@ -137,7 +90,12 @@ public class BlogPostDAO {
         Document post = new Document();
 
         Date now = new Date();
+
+        // Comments will be in the form of an array of individual documents
+        // Create an EMPTY array in readiness for the future
         List comments = new ArrayList<Object>();
+
+        // Create new post by bundling the various key/value pairs that are needed
         post.append("author", username)
             .append("title", title)
             .append("body", body)
@@ -145,6 +103,8 @@ public class BlogPostDAO {
             .append("tags", tags)
             .append("date", now)
             .append("comments", comments);
+
+        // Insert the freshly minted document in to collection
         postsCollection.insertOne(post);
 
         return permalink;
@@ -172,13 +132,20 @@ public class BlogPostDAO {
         // - best solution uses an update command to the database and a suitable
         //   operator to append the comment on to any existing list of comments
 
-        DBObject comment = new BasicDBObject()
+//        DBObject comment = new BasicDBObject()
+        Document comment = new Document()
                 .append("author", name)
-                .append("email", email)
-                .append("body", body);
+                .append("email",  email)
+                .append("body",   body);
 
-        postsCollection.updateOne(new  BasicDBObject("permalink", permalink),
-                new BasicDBObject("$push", new BasicDBObject("comments", comment)));
+        // Need to identify the post that the comments will be added in to
+        Document thePost =new Document("permalink", permalink);
+
+        // Specify the update.  Push in a "comment" document in to the "comments" array in the post
+        Document theUpdt =new Document("$push", new Document("comments",comment));
+
+        // Specify the post to change and how to change it
+        postsCollection.updateOne(thePost,theUpdt);
 
     }
 }

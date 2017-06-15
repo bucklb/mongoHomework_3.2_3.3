@@ -114,7 +114,7 @@ public class BlogController {
             public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
                 String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
 
-                List<Document> posts = blogPostDAO.findByDateDescending(10);
+                List<Document> posts = blogPostDAO.findByDateDescending(20);
                 SimpleHash root = new SimpleHash();
 
                 root.put("myposts", posts);
