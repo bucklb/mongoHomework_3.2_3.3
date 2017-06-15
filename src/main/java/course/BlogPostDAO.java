@@ -33,9 +33,6 @@ public class BlogPostDAO {
         MongoCursor<Document> cursor=postsCollection.find(new BasicDBObject("permalink", permalink)).iterator();
         post=cursor.next();
 
-        //        post = postsCollection.findOne(new BasicDBObject("permalink", permalink));
-
-
         return post;
     }
 
