@@ -19,9 +19,18 @@
 <a href="/logout">Logout</a>
 </li>
 <li>
-Create a New Post (not yet implemented)
+<a href="/newpost">Create A Post</a>
+</li>
+<li>
+<a href="/mine">Your posts</a>
 </li>
 
+<li>
+<a href="/byTag">Search by tag</a>
+</li>
+    <li>
+      <a href="/authors">Search by author</a>
+    </li>
 
   </body>
 
