@@ -144,6 +144,153 @@ public class BlogController {
             }
         });
 
+        // Want to add a mechanism to locate posts by tag
+        get(new FreemarkerBasedRoute("/byTag/:theTag", "blog_template.ftl") {
+            @Override
+            public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
+
+                String theTag = request.params(":theTag");
+                String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
+
+                // Need a function to search by TAG here
+                List<Document> posts = blogPostDAO.findByDateDescending(2);
+                SimpleHash root = new SimpleHash();
+
+                root.put("myposts", posts);
+
+                if (username != null) {
+                    root.put("username", theTag);
+                }
+
+                template.process(root, writer);
+            }
+        });
+
+        // Look at author options.  Take user to screen where they can specify an anuthor
+        get(new FreemarkerBasedRoute("/authors", "authors.ftl") {
+            @Override
+            public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
+
+                String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
+                SimpleHash root = new SimpleHash();
+
+                if (username != null) {
+                    root.put("username", username);
+                }
+
+                template.process(root, writer);
+            }
+        });
+
+        // will want to handle the POST of a tag
+        post(new FreemarkerBasedRoute("/authors", "authors.ftl") {
+            @Override
+            protected void doHandle(Request request, Response response, Writer writer)
+                    throws IOException, TemplateException {
+
+                String author = StringEscapeUtils.escapeHtml4(request.queryParams("author"));
+                System.out.println("author = " + author);
+
+                // now redirect to the blog permalink
+                response.redirect("/author/" + author);
+
+/*
+                if (username == null) {
+                    response.redirect("/login");    // only logged in users can post to blog
+                }
+                else {
+                    // extract tags
+                    ArrayList<String> tagsArray = extractTags(tags);
+
+                    // substitute some <p> for the paragraph breaks
+//                    post = post.replaceAll("\\r?\\n", "<p>");
+//
+//                    String permalink = blogPostDAO.addPost(title, post, tagsArray, username);
+
+                    // now redirect to the blog permalink
+                    response.redirect("/post/" + permalink);
+                }
+*/
+            }
+        });
+
+        // Look at author options.  Take user to screen where they can specify an anuthor
+        get(new FreemarkerBasedRoute("/author/:author", "blog_template.ftl") {
+            @Override
+            public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
+
+                String author = request.params(":author");
+                System.out.println("Chosen author = " + author);
+
+                List<Document> posts = blogPostDAO.findByAuthor(author,20);
+                SimpleHash root = new SimpleHash();
+
+                root.put("myposts", posts);
+                if (author != null) {
+                    root.put("username", author);
+                }
+
+                template.process(root, writer);
+            }
+
+        });
+
+
+
+
+
+
+
+        get(new FreemarkerBasedRoute("/byTag", "tag_choice.ftl") {
+            @Override
+            public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
+
+                String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
+                SimpleHash root = new SimpleHash();
+
+                if (username != null) {
+                    root.put("username", username);
+                }
+
+                template.process(root, writer);
+            }
+        });
+
+        // will want to handle the POST of a tag
+        post(new FreemarkerBasedRoute("/byTag", "tag_choice.ftl") {
+            @Override
+            protected void doHandle(Request request, Response response, Writer writer)
+                    throws IOException, TemplateException {
+
+                String tag = StringEscapeUtils.escapeHtml4(request.queryParams("tag"));
+                System.out.println("Tag = " + tag);
+
+                // now redirect to the blog permalink
+                response.redirect("/byTag/" + tag);
+
+/*
+                if (username == null) {
+                    response.redirect("/login");    // only logged in users can post to blog
+                }
+                else {
+                    // extract tags
+                    ArrayList<String> tagsArray = extractTags(tags);
+
+                    // substitute some <p> for the paragraph breaks
+//                    post = post.replaceAll("\\r?\\n", "<p>");
+//
+//                    String permalink = blogPostDAO.addPost(title, post, tagsArray, username);
+
+                    // now redirect to the blog permalink
+                    response.redirect("/post/" + permalink);
+                }
+*/
+            }
+        });
+
+
+
+
         // used to display actual blog post detail page
         get(new FreemarkerBasedRoute("/post/:permalink", "entry_template.ftl") {
             @Override
