@@ -114,7 +114,7 @@ public class BlogController {
             public void doHandle(Request request, Response response, Writer writer) throws IOException, TemplateException {
                 String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
 
-                List<Document> posts = blogPostDAO.findByDateDescending(20);
+                List<Document> posts = blogPostDAO.findByDateDescending(10);
                 SimpleHash root = new SimpleHash();
 
                 root.put("myposts", posts);
@@ -617,6 +617,33 @@ public class BlogController {
                 template.process(root, writer);
             }
         });
+
+
+        // Show the posts filed under a certain tag
+        get(new FreemarkerBasedRoute("/tag/:thetag", "blog_template.ftl") {
+            @Override
+            protected void doHandle(Request request, Response response, Writer writer)
+                    throws IOException, TemplateException {
+
+                String username = sessionDAO.findUserNameBySessionId(getSessionCookie(request));
+                SimpleHash root = new SimpleHash();
+
+                String tag = StringEscapeUtils.escapeHtml4(request.params(":thetag"));
+                List<Document> posts = blogPostDAO.findByTagDateDescending(tag);
+
+                root.put("myposts", posts);
+                if (username != null) {
+                    root.put("username", username);
+                }
+
+                template.process(root, writer);
+            }
+        });
+
+
+
+
+
     }
 
     // helper function to get session cookie as string

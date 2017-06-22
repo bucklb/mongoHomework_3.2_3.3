@@ -7,6 +7,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Sorts;
+import com.mongodb.client.model.Updates;
 
 import javax.print.Doc;
 import java.util.ArrayList;
@@ -40,6 +43,12 @@ public class BlogPostDAO {
         post=cursor.next();
 
         return post;
+    }
+    public List<Document> findByTagDateDescending(final String tag) {
+        return postsCollection.find(Filters.eq("tags", tag))
+                .sort(Sorts.descending("date"))
+                .limit(10)
+                .into(new ArrayList<Document>());
     }
 
     // Return a list of posts in descending order. Limit determines
